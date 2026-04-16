@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import {
   ArrowUpRight,
   BarChart3,
@@ -253,8 +254,8 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
   }, []);
 
   const theme = dark
-    ? "bg-[radial-gradient(circle_at_top,#201252_0%,#130839_45%,#0d052b_100%)] text-slate-50"
-    : "bg-slate-100 text-slate-900";
+    ? "bg-[radial-gradient(circle_at_top,#1e1b4b_0%,#312e81_30%,#1e293b_70%,#0f172a_100%)] text-slate-50"
+    : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-slate-900";
   const hasUploadAccess = history.length > 0;
   const cards = useMemo(
     () => [
@@ -265,13 +266,23 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
     ],
     [report]
   );
+  const pieData = useMemo(() => {
+    if (!report) return [];
+    return [
+      { name: "Keyword Match", value: report.keywordMatch, color: "#3b82f6" },
+      { name: "Section Completeness", value: report.sectionCompleteness, color: "#10b981" },
+      { name: "Readability", value: report.readability, color: "#f59e0b" },
+      { name: "Other", value: Math.max(0, 100 - report.keywordMatch - report.sectionCompleteness - report.readability), color: "#ef4444" },
+    ];
+  }, [report]);
 
   return (
     <div className={`min-h-screen ${theme} transition-colors`}>
       <main className="max-w-6xl mx-auto p-6 space-y-6">
         <motion.label
-          whileHover={{ scale: 1.01 }}
-          className={`${glowCard} flex cursor-pointer items-center justify-center gap-2 border-dashed border-indigo-400/50 p-10`}
+          whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }}
+          whileTap={{ scale: 0.98 }}
+          className={`${glowCard} flex cursor-pointer items-center justify-center gap-2 border-dashed border-indigo-400/50 p-10 hover:border-indigo-400/80 transition-colors`}
         >
           <FileUp size={18} /> Drop or Upload PDF/DOCX Resume
           <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={(e) => e.target.files?.[0] && uploadResume(e.target.files[0])} />
@@ -292,30 +303,126 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
           <>
             <section className="grid md:grid-cols-4 gap-4">
               {cards.map((card) => (
-                <motion.div whileHover={{ y: -4 }} key={card.label} className={`${glowCard} p-4`}>
+                <motion.div
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  key={card.label}
+                  className={`${glowCard} p-4 hover:shadow-lg transition-shadow`}
+                >
                   <p className="text-sm text-slate-400">{card.label}</p>
                   <p className="text-3xl font-semibold mt-2">{card.value}</p>
                 </motion.div>
               ))}
             </section>
             {report && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`${glowCard} p-6`}
+              >
+                <h2 className="text-xl font-semibold mb-4">ATS Score Breakdown</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </motion.section>
+            )}
+            {report && (
               <section className="grid md:grid-cols-2 gap-4">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`${glowCard} p-4`}>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`${glowCard} p-4 hover:shadow-xl transition-shadow`}
+                >
                   <h2 className="font-semibold mb-2">Missing Keywords</h2>
-                  <div className="flex flex-wrap gap-2">{report.missingKeywords.map((k) => <span key={k} className="text-xs rounded-full bg-red-500/20 px-2 py-1">{k}</span>)}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {report.missingKeywords.map((k) => (
+                      <motion.span
+                        key={k}
+                        whileHover={{ scale: 1.1 }}
+                        className="text-xs rounded-full bg-red-500/20 px-2 py-1 hover:bg-red-500/30 transition-colors"
+                      >
+                        {k}
+                      </motion.span>
+                    ))}
+                  </div>
                   <h3 className="font-semibold mt-4 mb-2">Improvements</h3>
-                  <ul className="text-sm space-y-1">{report.improvements.map((i, idx) => <li key={idx}>- {i}</li>)}</ul>
+                  <ul className="text-sm space-y-1">
+                    {report.improvements.map((i, idx) => (
+                      <motion.li
+                        key={idx}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="hover:text-cyan-300 transition-colors"
+                      >
+                        - {i}
+                      </motion.li>
+                    ))}
+                  </ul>
                 </motion.div>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`${glowCard} p-4`}>
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`${glowCard} p-4 hover:shadow-xl transition-shadow`}
+                >
                   <h2 className="font-semibold mb-2">Job Recommendations</h2>
-                  <div className="space-y-3">{report.jobRecommendations.map((job) => <div key={job.role} className="rounded-lg bg-slate-900/40 p-3"><p className="font-medium">{job.role} ({job.matchPercent}%)</p><p className="text-xs text-slate-400">{job.trendingSkills.join(", ")}</p></div>)}</div>
+                  <div className="space-y-3">
+                    {report.jobRecommendations.map((job, idx) => (
+                      <motion.div
+                        key={job.role}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.05 }}
+                        className="rounded-lg bg-slate-900/40 p-3 hover:bg-slate-900/60 transition-colors"
+                      >
+                        <p className="font-medium">{job.role} ({job.matchPercent}%)</p>
+                        <p className="text-xs text-slate-400">{job.trendingSkills.join(", ")}</p>
+                      </motion.div>
+                    ))}
+                  </div>
                 </motion.div>
               </section>
             )}
-            <section className={`${glowCard} p-4`}>
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`${glowCard} p-4 hover:shadow-lg transition-shadow`}
+            >
               <h2 className="font-semibold mb-3">Improvement History</h2>
-              <div className="space-y-2 text-sm">{history.map((h) => <div key={h._id} className="flex justify-between rounded-lg bg-slate-900/40 p-2"><span>{h.originalName}</span><span>{h.atsScore}/100</span></div>)}</div>
-            </section>
+              <div className="space-y-2 text-sm">
+                {history.map((h, idx) => (
+                  <motion.div
+                    key={h._id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="flex justify-between rounded-lg bg-slate-900/40 p-2 hover:bg-slate-900/60 transition-colors"
+                  >
+                    <span>{h.originalName}</span>
+                    <span>{h.atsScore}/100</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
           </>
         )}
       </main>
