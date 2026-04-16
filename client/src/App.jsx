@@ -26,7 +26,7 @@ const pageVariants = {
 };
 
 const glowCard =
-  "rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm shadow-[0_10px_30px_rgba(0,0,0,0.25)]";
+  "rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm shadow-[0_10px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-all duration-300";
 
 const TopNav = ({ isLoggedIn, onLogout, user, dark, setDark }) => {
   const location = useLocation();
@@ -215,6 +215,8 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [uploadMessage, setUploadMessage] = useState("");
+  const [activeSections, setActiveSections] = useState(new Set());
+  const [isRampageMode, setIsRampageMode] = useState(false);
 
   const loadHistory = async () => {
     setLoadingHistory(true);
@@ -249,13 +251,32 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
     }
   };
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
+  const toggleSection = (sectionName) => {
+    setActiveSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionName)) {
+        newSet.delete(sectionName);
+      } else {
+        newSet.add(sectionName);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleRampageMode = () => {
+    setIsRampageMode(prev => !prev);
+    if (!isRampageMode) {
+      // Enter rampage mode - show all sections
+      setActiveSections(new Set(pieData.map(item => item.name)));
+    } else {
+      // Exit rampage mode - hide all sections
+      setActiveSections(new Set());
+    }
+  };
 
   const theme = dark
-    ? "bg-[radial-gradient(circle_at_top,#1e1b4b_0%,#312e81_30%,#1e293b_70%,#0f172a_100%)] text-slate-50"
-    : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-slate-900";
+    ? "bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-slate-100"
+    : "bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 text-slate-900";
   const hasUploadAccess = history.length > 0;
   const cards = useMemo(
     () => [
@@ -269,10 +290,10 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
   const pieData = useMemo(() => {
     if (!report) return [];
     return [
-      { name: "Keyword Match", value: report.keywordMatch, color: "#3b82f6" },
-      { name: "Section Completeness", value: report.sectionCompleteness, color: "#10b981" },
-      { name: "Readability", value: report.readability, color: "#f59e0b" },
-      { name: "Other", value: Math.max(0, 100 - report.keywordMatch - report.sectionCompleteness - report.readability), color: "#ef4444" },
+      { name: "Keyword Match", value: report.keywordMatch, color: "#6366f1", gradient: "url(#keywordGradient)" },
+      { name: "Section Completeness", value: report.sectionCompleteness, color: "#10b981", gradient: "url(#sectionGradient)" },
+      { name: "Readability", value: report.readability, color: "#f59e0b", gradient: "url(#readabilityGradient)" },
+      { name: "Other", value: Math.max(0, 100 - report.keywordMatch - report.sectionCompleteness - report.readability), color: "#ef4444", gradient: "url(#otherGradient)" },
     ];
   }, [report]);
 
@@ -280,36 +301,69 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
     <div className={`min-h-screen ${theme} transition-colors`}>
       <main className="max-w-6xl mx-auto p-6 space-y-6">
         <motion.label
-          whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.02, boxShadow: "0 25px 50px rgba(0,0,0,0.25)" }}
           whileTap={{ scale: 0.98 }}
-          className={`${glowCard} flex cursor-pointer items-center justify-center gap-2 border-dashed border-indigo-400/50 p-10 hover:border-indigo-400/80 transition-colors`}
+          className={`${glowCard} flex cursor-pointer items-center justify-center gap-3 border-dashed border-indigo-400/50 p-12 hover:border-indigo-400/80 transition-all duration-300 relative overflow-hidden group`}
         >
-          <FileUp size={18} /> Drop or Upload PDF/DOCX Resume
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <FileUp size={24} className="text-indigo-400" />
+          </motion.div>
+          <div className="text-center relative z-10">
+            <p className="text-lg font-semibold mb-1">Drop or Upload PDF/DOCX Resume</p>
+            <p className="text-sm text-slate-400">Get instant ATS analysis and recommendations</p>
+          </div>
           <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={(e) => e.target.files?.[0] && uploadResume(e.target.files[0])} />
         </motion.label>
         {uploadMessage && (
-          <div className={`${glowCard} border-cyan-400/30 bg-cyan-400/10 p-3 text-sm text-cyan-100`}>
-            {uploadMessage}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`${glowCard} border-cyan-400/30 bg-cyan-400/10 p-4 text-sm ${dark ? 'text-cyan-100' : 'text-cyan-900'} border-l-4 border-cyan-400`}
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+              {uploadMessage}
+            </div>
+          </motion.div>
         )}
 
         {!loadingHistory && !hasUploadAccess && (
-          <div className={`${glowCard} border-amber-500/40 bg-amber-500/10 p-4 text-amber-100`}>
-            Upload your first resume to unlock ATS analytics and recommendations.
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`${glowCard} border-amber-500/40 bg-amber-500/10 p-4 ${dark ? 'text-amber-100' : 'text-amber-900'} border-l-4 border-amber-400`}
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+              Upload your first resume to unlock ATS analytics and recommendations.
+            </div>
+          </motion.div>
         )}
 
         {hasUploadAccess && (
           <>
-            <section className="grid md:grid-cols-4 gap-4">
-              {cards.map((card) => (
+            <section className="grid md:grid-cols-4 gap-6">
+              {cards.map((card, index) => (
                 <motion.div
-                  whileHover={{ y: -4, scale: 1.02 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.05, boxShadow: "0 25px 50px rgba(0,0,0,0.25)" }}
                   key={card.label}
-                  className={`${glowCard} p-4 hover:shadow-lg transition-shadow`}
+                  className={`${glowCard} p-6 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
                 >
-                  <p className="text-sm text-slate-400">{card.label}</p>
-                  <p className="text-3xl font-semibold mt-2">{card.value}</p>
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <p className={`text-sm ${dark ? 'text-slate-400' : 'text-slate-700'} font-medium mb-2 relative z-10`}>{card.label}</p>
+                  <p className="text-4xl font-bold mt-2 relative z-10 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    {card.value}
+                  </p>
+                  <div className="absolute -bottom-2 -right-2 w-16 h-16 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-300"></div>
                 </motion.div>
               ))}
             </section>
@@ -317,28 +371,257 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`${glowCard} p-6`}
+                className={`${glowCard} p-6 relative overflow-hidden`}
               >
-                <h2 className="text-xl font-semibold mb-4">ATS Score Breakdown</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-yellow-500/10 rounded-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-yellow-500/5 rounded-2xl animate-pulse"></div>
+
+                {/* Rampage Mode Toggle */}
+                <div className="flex justify-between items-center mb-4 relative z-10">
+                  <motion.h2
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xl font-semibold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent"
+                  >
+                    ATS Score Breakdown
+                  </motion.h2>
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleRampageMode}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 ${
+                      isRampageMode
+                        ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/50'
+                        : 'bg-gradient-to-r from-gray-700 to-gray-600 text-gray-300 hover:from-red-600 hover:to-orange-600 hover:text-white'
+                    }`}
+                  >
+                    {isRampageMode ? '🔥 RAMPAGE MODE' : '⚡ ACTIVATE RAMPAGE'}
+                  </motion.button>
+                </div>
+
+                <div className="relative">
+                  {/* Aggressive Background Effects */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 via-orange-900/20 to-yellow-900/20 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-yellow-500/10 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
+
+                  <ResponsiveContainer width="100%" height={400}>
+                    <PieChart>
+                      <defs>
+                        {/* Enhanced Rampage Gradients */}
+                        <linearGradient id="keywordGradient" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#ef4444" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#f87171" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#fca5a5" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#fecaca" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#fee2e2" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#fef2f2" stopOpacity={0.98}/>
+                        </linearGradient>
+                        <linearGradient id="sectionGradient" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#fb923c" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#fdba74" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#fed7aa" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#ffedd5" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#fff7ed" stopOpacity={0.98}/>
+                        </linearGradient>
+                        <linearGradient id="readabilityGradient" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#eab308" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#facc15" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#fde047" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#fef08a" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#fefce8" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#ffffe0" stopOpacity={0.98}/>
+                        </linearGradient>
+                        <linearGradient id="otherGradient" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#dc2626" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#ef4444" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#f87171" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#fca5a5" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#fecaca" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#fef2f2" stopOpacity={0.98}/>
+                        </linearGradient>
+
+                        {/* Rampage Filters */}
+                        <filter id="rampageGlow">
+                          <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                          <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                          </feMerge>
+                        </filter>
+                        <filter id="rampageShadow">
+                          <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="rgba(239, 68, 68, 0.6)"/>
+                        </filter>
+                        <filter id="fireEffect">
+                          <feTurbulence baseFrequency="0.05" numOctaves="3" result="noise"/>
+                          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5"/>
+                          <feGaussianBlur stdDeviation="2"/>
+                        </filter>
+                      </defs>
+
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={isRampageMode ? 130 : 110}
+                        innerRadius={isRampageMode ? 60 : 50}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => activeSections.has(name) || activeSections.size === 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
+                        labelLine={false}
+                        animationBegin={0}
+                        animationDuration={isRampageMode ? 3000 : 2500}
+                        animationEasing="ease-out"
+                        onClick={(data, index) => toggleSection(data.name)}
+                      >
+                        {pieData.map((entry, index) => {
+                          const isActive = activeSections.has(entry.name) || activeSections.size === 0;
+                          return (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={isActive ? entry.gradient : 'url(#otherGradient)'}
+                              stroke={entry.color}
+                              strokeWidth={isRampageMode ? 6 : 4}
+                              filter={isRampageMode ? "url(#rampageGlow) url(#fireEffect)" : "url(#rampageGlow)"}
+                              className={`transition-all duration-700 cursor-pointer ${
+                                isRampageMode
+                                  ? 'hover:scale-110 hover:rotate-12 animate-pulse'
+                                  : 'hover:scale-105 hover:opacity-90'
+                              }`}
+                              style={{
+                                filter: isRampageMode
+                                  ? 'drop-shadow(0 8px 16px rgba(239, 68, 68, 0.8)) brightness(1.2)'
+                                  : 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                                opacity: isActive ? 1 : 0.3,
+                                transform: isRampageMode ? 'scale(1.05)' : 'scale(1)',
+                              }}
+                            />
+                          );
+                        })}
+                      </Pie>
+
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(15, 23, 42, 0.98)',
+                          border: '2px solid #ef4444',
+                          borderRadius: '20px',
+                          boxShadow: '0 25px 50px rgba(239, 68, 68, 0.5)',
+                          backdropFilter: 'blur(20px)',
+                          color: '#e2e8f0',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                        }}
+                        labelStyle={{
+                          color: '#f87171',
+                          fontWeight: 'bold',
+                          fontSize: '18px',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                        }}
+                      />
+
+                      <Legend
+                        wrapperStyle={{
+                          paddingTop: '30px',
+                          color: '#cbd5e1'
+                        }}
+                        iconType="circle"
+                        formatter={(value, entry) => (
+                          <motion.span
+                            whileHover={{ scale: 1.1 }}
+                            style={{
+                              color: activeSections.has(value) || activeSections.size === 0 ? entry.color : '#666',
+                              fontWeight: '700',
+                              fontSize: '16px',
+                              textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => toggleSection(value)}
+                            className="transition-all duration-300 hover:text-red-400"
+                          >
+                            {value}
+                          </motion.span>
+                        )}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  {/* Rampage Mode Effects */}
+                  {isRampageMode && (
+                    <>
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-red-500 via-orange-500 to-yellow-500 opacity-50"
+                      ></motion.div>
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.8, 0.3] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20"
+                      ></motion.div>
+                    </>
+                  )}
+
+                  {/* Aggressive Floating Particles */}
+                  <motion.div
+                    animate={{
+                      y: [0, -15, 0],
+                      x: [0, 10, 0],
+                      rotate: [0, 180, 360],
+                      scale: [1, 1.3, 1]
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="absolute top-4 right-4 w-5 h-5 bg-gradient-to-br from-red-500 to-orange-500 rounded-full shadow-2xl animate-pulse"
+                  ></motion.div>
+
+                  <motion.div
+                    animate={{
+                      y: [0, 20, 0],
+                      x: [0, -15, 0],
+                      rotate: [360, 180, 0]
+                    }}
+                    transition={{
+                      duration: 3.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 0.5
+                    }}
+                    className="absolute bottom-6 left-6 w-4 h-4 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full shadow-2xl"
+                  ></motion.div>
+
+                  <motion.div
+                    animate={{
+                      scale: [0.8, 1.5, 0.8],
+                      opacity: [0.5, 1, 0.5],
+                      rotate: [0, 360]
+                    }}
+                    transition={{
+                      duration: 2.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 1
+                    }}
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-4 border-red-500 rounded-full opacity-60"
+                  ></motion.div>
+
+                  <motion.div
+                    animate={{
+                      y: [0, -10, 0],
+                      opacity: [0.7, 1, 0.7]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 1.5
+                    }}
+                    className="absolute bottom-4 right-4 w-3 h-3 bg-gradient-to-br from-yellow-500 to-red-500 rounded-full shadow-xl"
+                  ></motion.div>
+                </div>
               </motion.section>
             )}
             {report && (
@@ -346,32 +629,37 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ scale: 1.02 }}
-                  className={`${glowCard} p-4 hover:shadow-xl transition-shadow`}
+                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
+                  className={`${glowCard} p-6 hover:shadow-xl transition-all duration-300 relative overflow-hidden group`}
                 >
-                  <h2 className="font-semibold mb-2">Missing Keywords</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {report.missingKeywords.map((k) => (
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-orange-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <h2 className="font-semibold mb-3 text-lg relative z-10">Missing Keywords</h2>
+                  <div className="flex flex-wrap gap-3 relative z-10">
+                    {report.missingKeywords.map((k, idx) => (
                       <motion.span
                         key={k}
-                        whileHover={{ scale: 1.1 }}
-                        className="text-xs rounded-full bg-red-500/20 px-2 py-1 hover:bg-red-500/30 transition-colors"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.05 }}
+                        whileHover={{ scale: 1.1, backgroundColor: "#ef4444" }}
+                        className="text-xs rounded-full bg-red-500/20 px-3 py-2 hover:bg-red-500/40 transition-all duration-200 cursor-pointer border border-red-500/30"
                       >
                         {k}
                       </motion.span>
                     ))}
                   </div>
-                  <h3 className="font-semibold mt-4 mb-2">Improvements</h3>
-                  <ul className="text-sm space-y-1">
+                  <h3 className="font-semibold mt-6 mb-3 text-lg relative z-10">Improvements</h3>
+                  <ul className="text-sm space-y-2 relative z-10">
                     {report.improvements.map((i, idx) => (
                       <motion.li
                         key={idx}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="hover:text-cyan-300 transition-colors"
+                        className="hover:text-cyan-300 transition-colors duration-200 flex items-start gap-2"
                       >
-                        - {i}
+                        <span className="text-cyan-400 mt-1">•</span>
+                        {i}
                       </motion.li>
                     ))}
                   </ul>
@@ -379,22 +667,40 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ scale: 1.02 }}
-                  className={`${glowCard} p-4 hover:shadow-xl transition-shadow`}
+                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
+                  className={`${glowCard} p-6 hover:shadow-xl transition-all duration-300 relative overflow-hidden group`}
                 >
-                  <h2 className="font-semibold mb-2">Job Recommendations</h2>
-                  <div className="space-y-3">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <h2 className="font-semibold mb-3 text-lg relative z-10">Job Recommendations</h2>
+                  <div className="space-y-4 relative z-10">
                     {report.jobRecommendations.map((job, idx) => (
                       <motion.div
                         key={job.role}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        whileHover={{ scale: 1.05 }}
-                        className="rounded-lg bg-slate-900/40 p-3 hover:bg-slate-900/60 transition-colors"
+                        whileHover={{ scale: 1.03, backgroundColor: dark ? "#1e293b" : "#f8fafc" }}
+                        className="rounded-xl bg-slate-900/40 p-4 hover:bg-slate-900/60 transition-all duration-200 border border-slate-700/50 hover:border-slate-600/70"
                       >
-                        <p className="font-medium">{job.role} ({job.matchPercent}%)</p>
-                        <p className="text-xs text-slate-400">{job.trendingSkills.join(", ")}</p>
+                        <p className="font-semibold text-lg mb-1">{job.role}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex-1 bg-slate-700 rounded-full h-2">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${job.matchPercent}%` }}
+                              transition={{ delay: idx * 0.2, duration: 1 }}
+                              className="bg-gradient-to-r from-green-400 to-blue-400 h-2 rounded-full"
+                            ></motion.div>
+                          </div>
+                          <span className="text-sm font-medium text-green-400">{job.matchPercent}%</span>
+                        </div>
+                        <p className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-700'} flex flex-wrap gap-1`}>
+                          {job.trendingSkills.map((skill, skillIdx) => (
+                            <span key={skillIdx} className={`bg-blue-500/20 ${dark ? 'text-blue-300' : 'text-blue-700'} px-2 py-1 rounded-full text-xs`}>
+                              {skill}
+                            </span>
+                          ))}
+                        </p>
                       </motion.div>
                     ))}
                   </div>
@@ -404,21 +710,32 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`${glowCard} p-4 hover:shadow-lg transition-shadow`}
+              className={`${glowCard} p-6 hover:shadow-xl transition-all duration-300 relative overflow-hidden group`}
             >
-              <h2 className="font-semibold mb-3">Improvement History</h2>
-              <div className="space-y-2 text-sm">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <h2 className="font-semibold mb-4 text-lg relative z-10">Improvement History</h2>
+                      <div className="space-y-3 text-sm relative z-10">
                 {history.map((h, idx) => (
                   <motion.div
                     key={h._id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    whileHover={{ scale: 1.02 }}
-                    className="flex justify-between rounded-lg bg-slate-900/40 p-2 hover:bg-slate-900/60 transition-colors"
+                    whileHover={{ scale: 1.02, backgroundColor: dark ? "#1e293b" : "#f1f5f9" }}
+                    className={`flex justify-between rounded-xl ${dark ? 'bg-slate-900/40' : 'bg-white/60'} p-4 hover:bg-slate-900/60 transition-all duration-200 border ${dark ? 'border-slate-700/50' : 'border-slate-200/50'} hover:border-slate-600/70`}
                   >
-                    <span>{h.originalName}</span>
-                    <span>{h.atsScore}/100</span>
+                    <span className={`font-medium ${dark ? 'text-slate-200' : 'text-slate-800'}`}>{h.originalName}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 bg-slate-700 rounded-full h-2">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${h.atsScore}%` }}
+                          transition={{ delay: idx * 0.1, duration: 1 }}
+                          className="bg-gradient-to-r from-yellow-400 to-orange-400 h-2 rounded-full"
+                        ></motion.div>
+                      </div>
+                      <span className="font-bold text-yellow-400">{h.atsScore}/100</span>
+                    </div>
                   </motion.div>
                 ))}
               </div>
