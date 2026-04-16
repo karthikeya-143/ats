@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Sparkles,
   Sun,
-  UploadCloud,
   UserCircle2,
 } from "lucide-react";
 import { api } from "./lib/api";
@@ -28,7 +27,7 @@ const pageVariants = {
 const glowCard =
   "rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm shadow-[0_10px_30px_rgba(0,0,0,0.25)]";
 
-const TopNav = ({ isLoggedIn, onLogout }) => {
+const TopNav = ({ isLoggedIn, onLogout, user, dark, setDark }) => {
   const location = useLocation();
   const navItem = (to, label, icon) => (
     <Link
@@ -49,19 +48,30 @@ const TopNav = ({ isLoggedIn, onLogout }) => {
           <Gauge size={18} />
           <span className="font-semibold tracking-wide">ATS Scorer</span>
         </div>
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-3">
           {navItem("/", "Home", <Home size={14} />)}
-          {isLoggedIn && navItem("/dashboard", "Upload Resume", <UploadCloud size={14} />)}
           {!isLoggedIn && navItem("/signin", "Login", <KeyRound size={14} />)}
           {!isLoggedIn && navItem("/signup", "Register", <ArrowUpRight size={14} />)}
           {isLoggedIn && (
-            <button
-              onClick={onLogout}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500/90 px-3 py-2 text-sm text-white hover:bg-rose-500"
-            >
-              <LogOut size={14} />
-              Logout
-            </button>
+            <>
+              <button
+                onClick={() => setDark((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-100 hover:bg-white/10"
+              >
+                {dark ? <Sun size={14} /> : <Moon size={14} />}
+              </button>
+              <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-100">
+                <UserCircle2 size={14} />
+                {user?.name}
+              </span>
+              <button
+                onClick={onLogout}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500/90 px-3 py-2 text-sm text-white hover:bg-rose-500"
+              >
+                <LogOut size={14} />
+                Logout
+              </button>
+            </>
           )}
         </nav>
       </div>
@@ -102,18 +112,6 @@ const HomePage = ({ isLoggedIn }) => {
             >
               Upload Resume
             </button>
-            <Link
-              to="/signin"
-              className="rounded-lg border border-indigo-200/30 px-5 py-2.5 transition hover:bg-white/10"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="rounded-lg border border-indigo-200/30 px-5 py-2.5 transition hover:bg-white/10"
-            >
-              Sign Up
-            </Link>
           </div>
           <p className="mt-5 text-center text-sm text-indigo-200">
             Access to analysis dashboard is locked until at least one resume is uploaded.
@@ -270,14 +268,6 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
 
   return (
     <div className={`min-h-screen ${theme} transition-colors`}>
-      <header className="border-b border-white/10 p-4 flex justify-between items-center">
-        <div className="flex items-center gap-2"><BarChart3 size={18} /> ATS Resume Scorer</div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setDark((v) => !v)} className="rounded-lg border border-white/20 px-3 py-1">{dark ? <Sun size={16} /> : <Moon size={16} />}</button>
-          <span className="text-sm flex items-center gap-1"><UserCircle2 size={16} /> {user?.name}</span>
-          <button onClick={onLogout} className="rounded-lg bg-red-500 px-3 py-1 text-white">Logout</button>
-        </div>
-      </header>
       <main className="max-w-6xl mx-auto p-6 space-y-6">
         <motion.label
           whileHover={{ scale: 1.01 }}
@@ -348,7 +338,7 @@ function App() {
 
   return (
     <>
-      <TopNav isLoggedIn={Boolean(auth?.token)} onLogout={logout} />
+      <TopNav isLoggedIn={Boolean(auth?.token)} onLogout={logout} user={auth?.user} dark={dark} setDark={setDark} />
       <Routes>
         <Route path="/" element={<HomePage isLoggedIn={Boolean(auth?.token)} />} />
         <Route path="/signin" element={<AuthPage mode="signin" onAuth={handleAuth} />} />
