@@ -53,3 +53,5 @@ Production-style ATS Resume Scorer platform with authentication, resume upload/p
 - Never commit real secrets to source files
 - Keep Mongo URI and JWT secret only in env files
 - Input validation with Zod + auth middleware + upload size/type limits
+
+- fixing the Dashboard UI and some skill Analytics
