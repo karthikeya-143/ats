@@ -55,3 +55,4 @@ Production-style ATS Resume Scorer platform with authentication, resume upload/p
 - Input validation with Zod + auth middleware + upload size/type limits
 
 - fixing the Dashboard UI and some skill Analytics
+-Update will be on thursday
