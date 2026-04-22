@@ -33,8 +33,10 @@ const TopNav = ({ isLoggedIn, onLogout, user, dark, setDark }) => {
   const navItem = (to, label, icon) => (
     <Link
       to={to}
-      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition ${
-        location.pathname === to ? "bg-white/15 text-white" : "text-indigo-100 hover:bg-white/10"
+      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 ${
+        location.pathname === to 
+          ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/50 scale-105" 
+          : "text-slate-200 hover:text-white hover:bg-gradient-to-r hover:from-teal-500/30 hover:to-cyan-500/30 hover:scale-105"
       }`}
     >
       {icon}
@@ -43,35 +45,47 @@ const TopNav = ({ isLoggedIn, onLogout, user, dark, setDark }) => {
   );
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-[#3c2ca2]/90 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2 text-white">
-          <Gauge size={18} />
-          <span className="font-semibold tracking-wide">ATS Scorer</span>
-        </div>
-        <nav className="flex items-center gap-3">
+    <header className="sticky top-0 z-30 border-b border-teal-500/30 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl shadow-2xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          className="flex items-center gap-3 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          >
+            <Gauge size={24} className="text-teal-400" />
+          </motion.div>
+          <span className="text-lg font-bold tracking-wide">ATS Scorer</span>
+        </motion.div>
+        <nav className="flex items-center gap-2">
           {navItem("/", "Home", <Home size={14} />)}
           {!isLoggedIn && navItem("/signin", "Login", <KeyRound size={14} />)}
           {!isLoggedIn && navItem("/signup", "Register", <ArrowUpRight size={14} />)}
           {isLoggedIn && (
             <>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 20 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setDark((v) => !v)}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-100 hover:bg-white/10"
+                className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-gradient-to-r hover:from-amber-500/30 hover:to-orange-500/30 transition-all duration-300"
               >
                 {dark ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
-              <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-indigo-100">
+              </motion.button>
+              <span className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm text-slate-200 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30">
                 <UserCircle2 size={14} />
                 {user?.name}
               </span>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(16, 185, 129, 0.8)" }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onLogout}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500/90 px-3 py-2 text-sm text-white hover:bg-rose-500"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-medium text-white hover:from-emerald-600 hover:to-teal-600 transition-all duration-300"
               >
                 <LogOut size={14} />
                 Logout
-              </button>
+              </motion.button>
             </>
           )}
         </nav>
@@ -91,67 +105,207 @@ const HomePage = ({ isLoggedIn }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#4f35d6_0%,#23105f_32%,#17093f_72%,#0f062f_100%)] text-slate-100">
-      <main className="mx-auto max-w-6xl px-6 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-teal-600/20 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
+      <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-cyan-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }}></div>
+      
+      <main className="mx-auto max-w-6xl px-6 py-20 relative z-10">
         <motion.section
           variants={pageVariants}
           initial="hidden"
           animate="visible"
-          className={`${glowCard} p-10`}
+          className={`${glowCard} p-12 border-gradient-to-r from-teal-500/50 to-emerald-500/50 border-2 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 relative overflow-hidden`}
         >
-          <h1 className="text-center text-5xl font-extrabold tracking-tight md:text-6xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-transparent to-emerald-500/5 rounded-2xl"></div>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-teal-400/30 to-emerald-400/30 rounded-full blur-3xl"></div>
+          
+          <motion.h1 
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="relative z-10 text-center text-6xl font-extrabold tracking-tight md:text-7xl bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent"
+          >
             ATS Resume Analyzer
-          </h1>
-          <p className="mx-auto mt-4 max-w-3xl text-center text-lg text-indigo-100">
-            Upload your resume and instantly get ATS score, keyword insights, formatting checks,
-            and targeted role recommendations with smooth, data-rich feedback.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <button
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="relative z-10 mx-auto mt-6 max-w-3xl text-center text-xl text-slate-200 leading-relaxed"
+          >
+            Upload your resume and instantly get <span className="text-teal-300 font-semibold">ATS score</span>, <span className="text-emerald-300 font-semibold">keyword insights</span>, <span className="text-cyan-300 font-semibold">formatting checks</span>, and targeted role recommendations with smooth, data-rich feedback.
+          </motion.p>
+          <div className="relative z-10 mt-10 flex flex-wrap justify-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.08, boxShadow: "0 20px 50px rgba(20, 184, 166, 0.6)" }}
+              whileTap={{ scale: 0.95 }}
               onClick={onUploadClick}
-              className="rounded-lg bg-cyan-500 px-5 py-2.5 font-medium text-slate-900 transition hover:scale-[1.03] hover:bg-cyan-400"
+              className="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-8 py-3 font-bold text-white transition hover:from-teal-600 hover:to-emerald-600 shadow-lg"
             >
-              Upload Resume
-            </button>
+              ✨ Upload Resume
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.08, boxShadow: "0 20px 50px rgba(6, 182, 212, 0.6)" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/signin")}
+              className="rounded-xl border-2 border-gradient-to-r from-cyan-400 to-sky-400 px-8 py-3 font-bold text-cyan-300 transition hover:bg-cyan-500/20 shadow-lg"
+            >
+              Learn More
+            </motion.button>
           </div>
-          <p className="mt-5 text-center text-sm text-indigo-200">
-            Access to analysis dashboard is locked until at least one resume is uploaded.
-          </p>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="relative z-10 mt-8 text-center text-sm text-teal-300 font-medium"
+          >
+            🔒 Access to dashboard unlocks after uploading your first resume
+          </motion.p>
         </motion.section>
 
         <motion.section
           variants={pageVariants}
           initial="hidden"
           animate="visible"
-          className="mt-8 grid gap-4 md:grid-cols-3"
+          className="mt-16 grid gap-6 md:grid-cols-3"
         >
           {[
             {
-              icon: <KeyRound className="text-cyan-300" />,
+              icon: <KeyRound className="text-teal-300" size={28} />,
               title: "Keyword Matching",
               text: "Detects role-specific and ATS-relevant keywords from your resume.",
+              color: "from-teal-600/30 to-teal-400/10",
+              borderColor: "border-teal-500/50"
             },
             {
-              icon: <ShieldCheck className="text-yellow-300" />,
+              icon: <ShieldCheck className="text-emerald-300" size={28} />,
               title: "Format Analysis",
               text: "Checks layout quality, section structure, and parser friendliness.",
+              color: "from-emerald-600/30 to-emerald-400/10",
+              borderColor: "border-emerald-500/50"
             },
             {
-              icon: <BarChart3 className="text-emerald-300" />,
+              icon: <BarChart3 className="text-cyan-300" size={28} />,
               title: "Scoring System",
               text: "Scores your resume based on completeness, relevance, and readability.",
+              color: "from-cyan-600/30 to-cyan-400/10",
+              borderColor: "border-cyan-500/50"
             },
-          ].map((item) => (
+          ].map((item, idx) => (
             <motion.div
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -12, scale: 1.05 }}
               key={item.title}
-              className={`${glowCard} p-5 transition`}
+              className={`${glowCard} border-2 ${item.borderColor} bg-gradient-to-br ${item.color} p-8 transition relative overflow-hidden group`}
             >
-              {item.icon}
-              <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm text-indigo-100">{item.text}</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: idx * 0.2 }}
+                className="relative z-10"
+              >
+                {item.icon}
+              </motion.div>
+              <h3 className="relative z-10 mt-4 text-xl font-bold text-white">{item.title}</h3>
+              <p className="relative z-10 mt-3 text-slate-300">{item.text}</p>
             </motion.div>
           ))}
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className={`${glowCard} mt-16 border-2 border-gradient-to-r from-teal-500/50 via-emerald-500/50 to-cyan-500/50 bg-gradient-to-br from-teal-500/5 via-emerald-500/5 to-cyan-500/5 p-12`}
+        >
+          <motion.h2 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="text-center text-4xl font-bold bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent mb-3"
+          >
+            Why Choose ATS Scorer?
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="text-center text-slate-300 mb-10 max-w-2xl mx-auto"
+          >
+            Everything you need to make your resume stand out to ATS systems
+          </motion.p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: "⚡",
+                title: "Real-time Analysis",
+                description: "Instant feedback on your resume with detailed metrics",
+                color: "from-teal-500/20 to-teal-400/10",
+                borderColor: "border-teal-500/50",
+                iconColor: "text-teal-400"
+              },
+              {
+                icon: "🎯",
+                title: "Smart Recommendations",
+                description: "Tailored job suggestions based on your skills and experience",
+                color: "from-emerald-500/20 to-emerald-400/10",
+                borderColor: "border-emerald-500/50",
+                iconColor: "text-emerald-400"
+              },
+              {
+                icon: "📊",
+                title: "Visual Breakdown",
+                description: "See exactly how your resume scores across all metrics",
+                color: "from-cyan-500/20 to-cyan-400/10",
+                borderColor: "border-cyan-500/50",
+                iconColor: "text-cyan-400"
+              },
+              {
+                icon: "🚀",
+                title: "Actionable Insights",
+                description: "Get specific improvements to boost your ATS score",
+                color: "from-teal-500/20 to-teal-400/10",
+                borderColor: "border-teal-500/50",
+                iconColor: "text-teal-400"
+              },
+              {
+                icon: "🔐",
+                title: "100% Secure",
+                description: "Your data is completely private and never shared",
+                color: "from-emerald-500/20 to-emerald-400/10",
+                borderColor: "border-emerald-500/50",
+                iconColor: "text-emerald-400"
+              },
+              {
+                icon: "💡",
+                title: "AI Optimization",
+                description: "Smart keyword suggestions to match job requirements",
+                color: "from-cyan-500/20 to-cyan-400/10",
+                borderColor: "border-cyan-500/50",
+                iconColor: "text-cyan-400"
+              }
+            ].map((benefit, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 + idx * 0.08 }}
+                whileHover={{ y: -8, scale: 1.05 }}
+                className={`${glowCard} border-2 ${benefit.borderColor} bg-gradient-to-br ${benefit.color} p-6 rounded-2xl transition-all duration-300 relative overflow-hidden group cursor-pointer`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <motion.div 
+                  className={`text-5xl mb-4 relative z-10 ${benefit.iconColor}`}
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                >
+                  {benefit.icon}
+                </motion.div>
+                <h3 className="text-lg font-bold text-white mb-2 relative z-10">{benefit.title}</h3>
+                <p className="text-sm text-slate-300 relative z-10">{benefit.description}</p>
+              </motion.div>
+            ))}
+          </div>
         </motion.section>
       </main>
     </div>
@@ -169,42 +323,104 @@ const AuthPage = ({ mode, onAuth }) => {
     navigate("/dashboard");
   };
 
+  const isSignup = mode === "signup";
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#4f35d6_0%,#2d1575_30%,#170a42_100%)] p-4 text-slate-100">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 text-slate-100 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-600/30 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-600/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }}></div>
+      
       <motion.form
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 24, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5 }}
         onSubmit={submit}
-        className={`${glowCard} w-full max-w-md space-y-4 p-6`}
+        className={`${glowCard} w-full max-w-md space-y-6 p-8 border-2 border-gradient-to-r from-teal-500/50 to-emerald-500/50 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 relative z-10`}
       >
-        <h1 className="text-center text-3xl font-bold">
-          {mode === "signup" ? "Create Account" : "Welcome Back"}
-        </h1>
-        <p className="text-center text-sm text-indigo-100">
-          {mode === "signup" ? "Join ATS Scorer" : "Sign in to continue"}
-        </p>
-        {mode === "signup" && (
-          <input
-            className="w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 placeholder:text-indigo-100/70"
-            placeholder="Name"
+        <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-emerald-500/5 rounded-2xl pointer-events-none"></div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative z-10 text-center"
+        >
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-300 to-emerald-300 bg-clip-text text-transparent">
+            {isSignup ? "Create Account" : "Welcome Back"}
+          </h1>
+          <p className="mt-3 text-sm text-slate-300">
+            {isSignup ? "Join ATS Scorer today" : "Sign in to continue your journey"}
+          </p>
+        </motion.div>
+
+        {isSignup && (
+          <motion.input
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            whileFocus={{ scale: 1.02 }}
+            className="relative z-10 w-full rounded-xl border-2 border-teal-500/30 bg-teal-500/10 px-4 py-3 placeholder:text-slate-500 text-white focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300 backdrop-blur-sm"
+            placeholder="Full Name"
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
         )}
-        <input
-          className="w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 placeholder:text-indigo-100/70"
+        
+        <motion.input
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.25 }}
+          whileFocus={{ scale: 1.02 }}
+          className="relative z-10 w-full rounded-xl border-2 border-teal-500/30 bg-teal-500/10 px-4 py-3 placeholder:text-slate-500 text-white focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300 backdrop-blur-sm"
           type="email"
-          placeholder="Email"
+          placeholder="Email Address"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
-        <input
-          className="w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 placeholder:text-indigo-100/70"
+        
+        <motion.input
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          whileFocus={{ scale: 1.02 }}
+          className="relative z-10 w-full rounded-xl border-2 border-teal-500/30 bg-teal-500/10 px-4 py-3 placeholder:text-slate-500 text-white focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all duration-300 backdrop-blur-sm"
           type="password"
-          placeholder="Password"
+          placeholder="Password (min. 6 chars)"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        <button className="w-full rounded-lg bg-cyan-400 py-2 font-semibold text-slate-900 transition hover:bg-cyan-300">
-          {mode === "signup" ? "Create Account" : "Sign In"}
-        </button>
+
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          whileHover={{ scale: 1.05, boxShadow: "0 20px 50px rgba(20, 184, 166, 0.6)" }}
+          whileTap={{ scale: 0.95 }}
+          className="relative z-10 w-full rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 py-3 font-bold text-white transition hover:from-teal-600 hover:to-emerald-600 shadow-lg"
+        >
+          {isSignup ? "✨ Create Account" : "🚀 Sign In"}
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="relative z-10 text-center text-sm text-slate-400"
+        >
+          {isSignup ? (
+            <>
+              Already have an account?{" "}
+              <Link to="/signin" className="font-semibold text-teal-400 hover:text-teal-300 transition-colors">
+                Sign in here
+              </Link>
+            </>
+          ) : (
+            <>
+              Don't have an account?{" "}
+              <Link to="/signup" className="font-semibold text-teal-400 hover:text-teal-300 transition-colors">
+                Create one now
+              </Link>
+            </>
+          )}
+        </motion.div>
       </motion.form>
     </div>
   );
@@ -275,8 +491,8 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
   };
 
   const theme = dark
-    ? "bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-slate-100"
-    : "bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 text-slate-900";
+    ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100"
+    : "bg-gradient-to-br from-slate-50 via-slate-50 to-slate-50 text-slate-900";
   const hasUploadAccess = history.length > 0;
   const cards = useMemo(
     () => [
@@ -290,10 +506,10 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
   const pieData = useMemo(() => {
     if (!report) return [];
     return [
-      { name: "Keyword Match", value: report.keywordMatch, color: "#6366f1", gradient: "url(#keywordGradient)" },
+      { name: "Keyword Match", value: report.keywordMatch, color: "#14b8a6", gradient: "url(#keywordGradient)" },
       { name: "Section Completeness", value: report.sectionCompleteness, color: "#10b981", gradient: "url(#sectionGradient)" },
-      { name: "Readability", value: report.readability, color: "#f59e0b", gradient: "url(#readabilityGradient)" },
-      { name: "Other", value: Math.max(0, 100 - report.keywordMatch - report.sectionCompleteness - report.readability), color: "#ef4444", gradient: "url(#otherGradient)" },
+      { name: "Readability", value: report.readability, color: "#06b6d4", gradient: "url(#readabilityGradient)" },
+      { name: "Other", value: Math.max(0, 100 - report.keywordMatch - report.sectionCompleteness - report.readability), color: "#0e7490", gradient: "url(#otherGradient)" },
     ];
   }, [report]);
 
@@ -303,19 +519,20 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
         <motion.label
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.02, boxShadow: "0 25px 50px rgba(0,0,0,0.25)" }}
+          whileHover={{ scale: 1.02, boxShadow: "0 25px 50px rgba(20, 184, 166, 0.4)" }}
           whileTap={{ scale: 0.98 }}
-          className={`${glowCard} flex cursor-pointer items-center justify-center gap-3 border-dashed border-indigo-400/50 p-12 hover:border-indigo-400/80 transition-all duration-300 relative overflow-hidden group`}
+          className={`${glowCard} flex cursor-pointer items-center justify-center gap-4 border-2 border-dashed border-gradient-to-r from-teal-500 to-emerald-500 p-12 hover:border-teal-400/80 transition-all duration-300 relative overflow-hidden group bg-gradient-to-br from-teal-500/10 to-emerald-500/10`}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <motion.div
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ rotate: [0, 10, -10, 0], y: [0, -5, 5, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            className="relative z-10"
           >
-            <FileUp size={24} className="text-indigo-400" />
+            <FileUp size={32} className="text-gradient-to-r from-teal-400 to-emerald-400 text-teal-400" />
           </motion.div>
           <div className="text-center relative z-10">
-            <p className="text-lg font-semibold mb-1">Drop or Upload PDF/DOCX Resume</p>
+            <p className="text-lg font-bold bg-gradient-to-r from-teal-300 to-emerald-300 bg-clip-text text-transparent mb-1">Drop or Upload PDF/DOCX Resume</p>
             <p className="text-sm text-slate-400">Get instant ATS analysis and recommendations</p>
           </div>
           <input type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={(e) => e.target.files?.[0] && uploadResume(e.target.files[0])} />
@@ -324,10 +541,10 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`${glowCard} border-cyan-400/30 bg-cyan-400/10 p-4 text-sm ${dark ? 'text-cyan-100' : 'text-cyan-900'} border-l-4 border-cyan-400`}
+            className={`${glowCard} border-teal-400/30 bg-teal-400/10 p-4 text-sm ${dark ? 'text-teal-100' : 'text-teal-900'} border-l-4 border-teal-400`}
           >
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
               {uploadMessage}
             </div>
           </motion.div>
@@ -354,16 +571,16 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -8, scale: 1.05, boxShadow: "0 25px 50px rgba(0,0,0,0.25)" }}
+                  whileHover={{ y: -12, scale: 1.08, boxShadow: "0 30px 60px rgba(20, 184, 166, 0.4)" }}
                   key={card.label}
-                  className={`${glowCard} p-6 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group`}
+                  className={`${glowCard} p-6 bg-gradient-to-br from-teal-500/10 via-emerald-500/5 to-cyan-500/10 border-2 border-gradient-to-r from-teal-500/30 to-emerald-500/30 hover:border-teal-500/60 transition-all duration-300 relative overflow-hidden group`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <p className={`text-sm ${dark ? 'text-slate-400' : 'text-slate-700'} font-medium mb-2 relative z-10`}>{card.label}</p>
-                  <p className="text-4xl font-bold mt-2 relative z-10 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <p className={`text-sm ${dark ? 'text-slate-400' : 'text-slate-700'} font-medium mb-2 relative z-10 uppercase tracking-wide`}>{card.label}</p>
+                  <p className="text-5xl font-black mt-2 relative z-10 bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
                     {card.value}
                   </p>
-                  <div className="absolute -bottom-2 -right-2 w-16 h-16 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                  <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-gradient-to-br from-teal-400/20 to-emerald-400/20 rounded-full blur-2xl group-hover:blur-3xl transition-all duration-300"></div>
                 </motion.div>
               ))}
             </section>
@@ -371,17 +588,17 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`${glowCard} p-6 relative overflow-hidden`}
+                className={`${glowCard} p-6 border-2 border-gradient-to-r from-teal-500/30 to-cyan-500/30 bg-gradient-to-br from-teal-500/10 to-cyan-500/10 relative overflow-hidden`}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-yellow-500/10 rounded-2xl"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-yellow-500/5 rounded-2xl animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 rounded-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-teal-500/5 rounded-2xl animate-pulse"></div>
 
                 {/* Rampage Mode Toggle */}
                 <div className="flex justify-between items-center mb-4 relative z-10">
                   <motion.h2
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-xl font-semibold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent"
+                    className="text-xl font-semibold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent"
                   >
                     ATS Score Breakdown
                   </motion.h2>
@@ -391,8 +608,8 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                     onClick={toggleRampageMode}
                     className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 ${
                       isRampageMode
-                        ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/50'
-                        : 'bg-gradient-to-r from-gray-700 to-gray-600 text-gray-300 hover:from-red-600 hover:to-orange-600 hover:text-white'
+                        ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/50'
+                        : 'bg-gradient-to-r from-gray-700 to-gray-600 text-gray-300 hover:from-teal-600 hover:to-emerald-600 hover:text-white'
                     }`}
                   >
                     {isRampageMode ? '🔥 RAMPAGE MODE' : '⚡ ACTIVATE RAMPAGE'}
@@ -401,44 +618,44 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
 
                 <div className="relative">
                   {/* Aggressive Background Effects */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 via-orange-900/20 to-yellow-900/20 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-yellow-500/10 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-900/20 via-emerald-900/20 to-cyan-900/20 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-emerald-500/10 to-cyan-500/10 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
 
                   <ResponsiveContainer width="100%" height={400}>
                     <PieChart>
                       <defs>
                         {/* Enhanced Rampage Gradients */}
                         <linearGradient id="keywordGradient" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#ef4444" stopOpacity={0.98}/>
-                          <stop offset="20%" stopColor="#f87171" stopOpacity={0.98}/>
-                          <stop offset="40%" stopColor="#fca5a5" stopOpacity={0.98}/>
-                          <stop offset="60%" stopColor="#fecaca" stopOpacity={0.98}/>
-                          <stop offset="80%" stopColor="#fee2e2" stopOpacity={0.98}/>
-                          <stop offset="100%" stopColor="#fef2f2" stopOpacity={0.98}/>
+                          <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#2dd4bf" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#5eead4" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#99f6e4" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#ccfbf1" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#f0fdfa" stopOpacity={0.98}/>
                         </linearGradient>
                         <linearGradient id="sectionGradient" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#f97316" stopOpacity={0.98}/>
-                          <stop offset="20%" stopColor="#fb923c" stopOpacity={0.98}/>
-                          <stop offset="40%" stopColor="#fdba74" stopOpacity={0.98}/>
-                          <stop offset="60%" stopColor="#fed7aa" stopOpacity={0.98}/>
-                          <stop offset="80%" stopColor="#ffedd5" stopOpacity={0.98}/>
-                          <stop offset="100%" stopColor="#fff7ed" stopOpacity={0.98}/>
+                          <stop offset="0%" stopColor="#059669" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#10b981" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#34d399" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#6ee7b7" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#a7f3d0" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#d1fae5" stopOpacity={0.98}/>
                         </linearGradient>
                         <linearGradient id="readabilityGradient" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#eab308" stopOpacity={0.98}/>
-                          <stop offset="20%" stopColor="#facc15" stopOpacity={0.98}/>
-                          <stop offset="40%" stopColor="#fde047" stopOpacity={0.98}/>
-                          <stop offset="60%" stopColor="#fef08a" stopOpacity={0.98}/>
-                          <stop offset="80%" stopColor="#fefce8" stopOpacity={0.98}/>
-                          <stop offset="100%" stopColor="#ffffe0" stopOpacity={0.98}/>
+                          <stop offset="0%" stopColor="#0891b2" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#06b6d4" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#22d3ee" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#67e8f9" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#a5f3fc" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#cffafe" stopOpacity={0.98}/>
                         </linearGradient>
                         <linearGradient id="otherGradient" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#dc2626" stopOpacity={0.98}/>
-                          <stop offset="20%" stopColor="#ef4444" stopOpacity={0.98}/>
-                          <stop offset="40%" stopColor="#f87171" stopOpacity={0.98}/>
-                          <stop offset="60%" stopColor="#fca5a5" stopOpacity={0.98}/>
-                          <stop offset="80%" stopColor="#fecaca" stopOpacity={0.98}/>
-                          <stop offset="100%" stopColor="#fef2f2" stopOpacity={0.98}/>
+                          <stop offset="0%" stopColor="#0e7490" stopOpacity={0.98}/>
+                          <stop offset="20%" stopColor="#155e75" stopOpacity={0.98}/>
+                          <stop offset="40%" stopColor="#164e63" stopOpacity={0.98}/>
+                          <stop offset="60%" stopColor="#083344" stopOpacity={0.98}/>
+                          <stop offset="80%" stopColor="#032f3a" stopOpacity={0.98}/>
+                          <stop offset="100%" stopColor="#0c2835" stopOpacity={0.98}/>
                         </linearGradient>
 
                         {/* Rampage Filters */}
@@ -450,7 +667,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                           </feMerge>
                         </filter>
                         <filter id="rampageShadow">
-                          <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="rgba(239, 68, 68, 0.6)"/>
+                          <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="rgba(20, 184, 166, 0.6)"/>
                         </filter>
                         <filter id="fireEffect">
                           <feTurbulence baseFrequency="0.05" numOctaves="3" result="noise"/>
@@ -490,7 +707,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                               }`}
                               style={{
                                 filter: isRampageMode
-                                  ? 'drop-shadow(0 8px 16px rgba(239, 68, 68, 0.8)) brightness(1.2)'
+                                  ? 'drop-shadow(0 8px 16px rgba(20, 184, 166, 0.8)) brightness(1.2)'
                                   : 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
                                 opacity: isActive ? 1 : 0.3,
                                 transform: isRampageMode ? 'scale(1.05)' : 'scale(1)',
@@ -503,9 +720,9 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'rgba(15, 23, 42, 0.98)',
-                          border: '2px solid #ef4444',
+                          border: '2px solid #14b8a6',
                           borderRadius: '20px',
-                          boxShadow: '0 25px 50px rgba(239, 68, 68, 0.5)',
+                          boxShadow: '0 25px 50px rgba(20, 184, 166, 0.5)',
                           backdropFilter: 'blur(20px)',
                           color: '#e2e8f0',
                           fontSize: '16px',
@@ -513,7 +730,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                           textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                         }}
                         labelStyle={{
-                          color: '#f87171',
+                          color: '#2dd4bf',
                           fontWeight: 'bold',
                           fontSize: '18px',
                           textShadow: '0 1px 2px rgba(0,0,0,0.8)'
@@ -537,7 +754,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                               cursor: 'pointer'
                             }}
                             onClick={() => toggleSection(value)}
-                            className="transition-all duration-300 hover:text-red-400"
+                            className="transition-all duration-300 hover:text-teal-400"
                           >
                             {value}
                           </motion.span>
@@ -552,12 +769,12 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                       <motion.div
                         animate={{ rotate: [0, 360] }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-red-500 via-orange-500 to-yellow-500 opacity-50"
+                        className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 opacity-50"
                       ></motion.div>
                       <motion.div
                         animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.8, 0.3] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
-                        className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20"
+                        className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-500/20 via-emerald-500/20 to-cyan-500/20"
                       ></motion.div>
                     </>
                   )}
@@ -575,7 +792,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="absolute top-4 right-4 w-5 h-5 bg-gradient-to-br from-red-500 to-orange-500 rounded-full shadow-2xl animate-pulse"
+                    className="absolute top-4 right-4 w-5 h-5 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full shadow-2xl animate-pulse"
                   ></motion.div>
 
                   <motion.div
@@ -590,7 +807,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                       ease: "easeInOut",
                       delay: 0.5
                     }}
-                    className="absolute bottom-6 left-6 w-4 h-4 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full shadow-2xl"
+                    className="absolute bottom-6 left-6 w-4 h-4 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-full shadow-2xl"
                   ></motion.div>
 
                   <motion.div
@@ -605,7 +822,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                       ease: "easeInOut",
                       delay: 1
                     }}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-4 border-red-500 rounded-full opacity-60"
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-4 border-teal-500 rounded-full opacity-60"
                   ></motion.div>
 
                   <motion.div
@@ -619,47 +836,48 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                       ease: "easeInOut",
                       delay: 1.5
                     }}
-                    className="absolute bottom-4 right-4 w-3 h-3 bg-gradient-to-br from-yellow-500 to-red-500 rounded-full shadow-xl"
+                    className="absolute bottom-4 right-4 w-3 h-3 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full shadow-xl"
                   ></motion.div>
                 </div>
               </motion.section>
             )}
             {report && (
-              <section className="grid md:grid-cols-2 gap-4">
+              <section className="grid md:grid-cols-2 gap-6">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
-                  className={`${glowCard} p-6 hover:shadow-xl transition-all duration-300 relative overflow-hidden group`}
+                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(239, 68, 68, 0.3)" }}
+                  className={`${glowCard} p-6 border-2 border-red-500/30 bg-gradient-to-br from-red-500/10 to-orange-500/10 hover:border-red-500/60 transition-all duration-300 relative overflow-hidden group`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-orange-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <h2 className="font-semibold mb-3 text-lg relative z-10">Missing Keywords</h2>
-                  <div className="flex flex-wrap gap-3 relative z-10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <h2 className="font-bold mb-4 text-lg relative z-10 text-red-300">⚠️ Missing Keywords</h2>
+                  <div className="flex flex-wrap gap-2 relative z-10">
                     {report.missingKeywords.map((k, idx) => (
                       <motion.span
                         key={k}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: idx * 0.05 }}
-                        whileHover={{ scale: 1.1, backgroundColor: "#ef4444" }}
-                        className="text-xs rounded-full bg-red-500/20 px-3 py-2 hover:bg-red-500/40 transition-all duration-200 cursor-pointer border border-red-500/30"
+                        whileHover={{ scale: 1.15, backgroundColor: "rgba(239, 68, 68, 0.4)" }}
+                        className="text-xs rounded-full bg-red-500/20 px-3 py-2 hover:bg-red-500/40 transition-all duration-200 cursor-pointer border border-red-500/50 text-red-200 font-semibold"
                       >
                         {k}
                       </motion.span>
                     ))}
                   </div>
-                  <h3 className="font-semibold mt-6 mb-3 text-lg relative z-10">Improvements</h3>
-                  <ul className="text-sm space-y-2 relative z-10">
+                  <h3 className="font-bold mt-6 mb-3 text-lg relative z-10 text-teal-300">💡 Improvements</h3>
+                  <ul className="text-sm space-y-3 relative z-10">
                     {report.improvements.map((i, idx) => (
                       <motion.li
                         key={idx}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="hover:text-cyan-300 transition-colors duration-200 flex items-start gap-2"
+                        whileHover={{ x: 8 }}
+                        className="hover:text-teal-300 transition-colors duration-200 flex items-start gap-3"
                       >
-                        <span className="text-cyan-400 mt-1">•</span>
-                        {i}
+                        <span className="text-teal-400 mt-1 text-lg">→</span>
+                        <span className="text-slate-300">{i}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -667,11 +885,11 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
-                  className={`${glowCard} p-6 hover:shadow-xl transition-all duration-300 relative overflow-hidden group`}
+                  whileHover={{ scale: 1.02, boxShadow: "0 20px 40px rgba(16, 185, 129, 0.3)" }}
+                  className={`${glowCard} p-6 border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 hover:border-emerald-500/60 transition-all duration-300 relative overflow-hidden group`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <h2 className="font-semibold mb-3 text-lg relative z-10">Job Recommendations</h2>
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <h2 className="font-bold mb-4 text-lg relative z-10 text-emerald-300">🎯 Job Recommendations</h2>
                   <div className="space-y-4 relative z-10">
                     {report.jobRecommendations.map((job, idx) => (
                       <motion.div
@@ -679,26 +897,30 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        whileHover={{ scale: 1.03, backgroundColor: dark ? "#1e293b" : "#f8fafc" }}
-                        className="rounded-xl bg-slate-900/40 p-4 hover:bg-slate-900/60 transition-all duration-200 border border-slate-700/50 hover:border-slate-600/70"
+                        whileHover={{ scale: 1.05, backgroundColor: dark ? "rgba(16, 185, 129, 0.15)" : "rgba(16, 185, 129, 0.1)" }}
+                        className={`rounded-xl ${dark ? 'bg-slate-900/50' : 'bg-white/70'} border-2 border-emerald-500/30 p-4 hover:border-emerald-500/60 transition-all duration-200`}
                       >
-                        <p className="font-semibold text-lg mb-1">{job.role}</p>
-                        <div className="flex items-center gap-2 mb-2">
+                        <p className="font-bold text-lg text-emerald-300 mb-2">{job.role}</p>
+                        <div className="flex items-center gap-3 mb-3">
                           <div className="flex-1 bg-slate-700 rounded-full h-2">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${job.matchPercent}%` }}
                               transition={{ delay: idx * 0.2, duration: 1 }}
-                              className="bg-gradient-to-r from-green-400 to-blue-400 h-2 rounded-full"
+                              className="bg-gradient-to-r from-emerald-400 to-teal-400 h-2 rounded-full"
                             ></motion.div>
                           </div>
-                          <span className="text-sm font-medium text-green-400">{job.matchPercent}%</span>
+                          <span className="text-sm font-bold text-emerald-400">{job.matchPercent}%</span>
                         </div>
-                        <p className={`text-xs ${dark ? 'text-slate-400' : 'text-slate-700'} flex flex-wrap gap-1`}>
+                        <p className={`text-xs flex flex-wrap gap-2`}>
                           {job.trendingSkills.map((skill, skillIdx) => (
-                            <span key={skillIdx} className={`bg-blue-500/20 ${dark ? 'text-blue-300' : 'text-blue-700'} px-2 py-1 rounded-full text-xs`}>
+                            <motion.span 
+                              key={skillIdx}
+                              whileHover={{ scale: 1.1 }}
+                              className={`bg-cyan-500/30 text-cyan-200 px-2 py-1 rounded-full text-xs font-medium border border-cyan-500/50`}
+                            >
                               {skill}
-                            </span>
+                            </motion.span>
                           ))}
                         </p>
                       </motion.div>
@@ -710,31 +932,32 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`${glowCard} p-6 hover:shadow-xl transition-all duration-300 relative overflow-hidden group`}
+              whileHover={{ scale: 1.01 }}
+              className={`${glowCard} p-6 border-2 border-gradient-to-r from-cyan-500/30 to-sky-500/30 bg-gradient-to-br from-cyan-500/10 to-sky-500/10 hover:border-cyan-500/60 transition-all duration-300 relative overflow-hidden group`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <h2 className="font-semibold mb-4 text-lg relative z-10">Improvement History</h2>
-                      <div className="space-y-3 text-sm relative z-10">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <h2 className="font-bold mb-4 text-lg relative z-10 text-cyan-300">📊 Improvement History</h2>
+              <div className="space-y-3 text-sm relative z-10">
                 {history.map((h, idx) => (
                   <motion.div
                     key={h._id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    whileHover={{ scale: 1.02, backgroundColor: dark ? "#1e293b" : "#f1f5f9" }}
-                    className={`flex justify-between rounded-xl ${dark ? 'bg-slate-900/40' : 'bg-white/60'} p-4 hover:bg-slate-900/60 transition-all duration-200 border ${dark ? 'border-slate-700/50' : 'border-slate-200/50'} hover:border-slate-600/70`}
+                    whileHover={{ scale: 1.03, backgroundColor: dark ? "rgba(6, 182, 212, 0.15)" : "rgba(6, 182, 212, 0.1)" }}
+                    className={`flex justify-between rounded-xl ${dark ? 'bg-slate-900/50' : 'bg-white/70'} border-2 border-cyan-500/30 p-4 hover:border-cyan-500/60 transition-all duration-200`}
                   >
-                    <span className={`font-medium ${dark ? 'text-slate-200' : 'text-slate-800'}`}>{h.originalName}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 bg-slate-700 rounded-full h-2">
+                    <span className={`font-semibold text-lg ${dark ? 'text-cyan-200' : 'text-cyan-800'}`}>{h.originalName}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 bg-slate-700 rounded-full h-2">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${h.atsScore}%` }}
                           transition={{ delay: idx * 0.1, duration: 1 }}
-                          className="bg-gradient-to-r from-yellow-400 to-orange-400 h-2 rounded-full"
+                          className="bg-gradient-to-r from-cyan-400 to-sky-400 h-2 rounded-full"
                         ></motion.div>
                       </div>
-                      <span className="font-bold text-yellow-400">{h.atsScore}/100</span>
+                      <span className="font-bold text-cyan-400 text-lg min-w-12 text-right">{h.atsScore}/100</span>
                     </div>
                   </motion.div>
                 ))}
@@ -744,6 +967,41 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
         )}
       </main>
     </div>
+  );
+};
+
+const Footer = () => {
+  return (
+    <motion.footer 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="border-t border-teal-500/30 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur-xl text-center py-8 text-sm text-slate-300"
+    >
+      <div className="mx-auto max-w-6xl px-6">
+        <motion.p 
+          className="flex items-center justify-center gap-2 flex-wrap"
+          whileHover={{ scale: 1.02 }}
+        >
+          <span>© 2026 ATS Scorer.</span>
+          <span>Built by</span>
+          <motion.span 
+            className="font-bold bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent"
+            whileHover={{ scale: 1.15 }}
+          >
+            Karthikeya
+          </motion.span>
+          <span>and</span>
+          <motion.span 
+            className="font-bold bg-gradient-to-r from-cyan-400 to-sky-400 bg-clip-text text-transparent"
+            whileHover={{ scale: 1.15 }}
+          >
+            Praveen
+          </motion.span>
+          <span>•</span>
+          <span>All rights reserved.</span>
+        </motion.p>
+      </div>
+    </motion.footer>
   );
 };
 
@@ -770,6 +1028,7 @@ function App() {
         <Route path="/dashboard" element={auth?.token ? <Dashboard token={auth.token} user={auth.user} onLogout={logout} dark={dark} setDark={setDark} /> : <Navigate to="/signin" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Footer />
     </>
   );
 }

@@ -1,3 +1,4 @@
+global.DOMMatrix = class DOMMatrix {};
 const { PDFParse } = require("pdf-parse");
 const mammoth = require("mammoth");
 
