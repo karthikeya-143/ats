@@ -216,7 +216,6 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [uploadMessage, setUploadMessage] = useState("");
   const [activeSections, setActiveSections] = useState(new Set());
-  const [isRampageMode, setIsRampageMode] = useState(false);
 
   const loadHistory = async () => {
     setLoadingHistory(true);
@@ -261,17 +260,6 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
       }
       return newSet;
     });
-  };
-
-  const toggleRampageMode = () => {
-    setIsRampageMode(prev => !prev);
-    if (!isRampageMode) {
-      // Enter rampage mode - show all sections
-      setActiveSections(new Set(pieData.map(item => item.name)));
-    } else {
-      // Exit rampage mode - hide all sections
-      setActiveSections(new Set());
-    }
   };
 
   const theme = dark
@@ -376,27 +364,14 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-yellow-500/10 rounded-2xl"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-yellow-500/5 rounded-2xl animate-pulse"></div>
 
-                {/* Rampage Mode Toggle */}
                 <div className="flex justify-between items-center mb-4 relative z-10">
                   <motion.h2
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-xl font-semibold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent"
+                    className="text-xl font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent"
                   >
                     ATS Score Breakdown
                   </motion.h2>
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={toggleRampageMode}
-                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 ${
-                      isRampageMode
-                        ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/50'
-                        : 'bg-gradient-to-r from-gray-700 to-gray-600 text-gray-300 hover:from-red-600 hover:to-orange-600 hover:text-white'
-                    }`}
-                  >
-                    {isRampageMode ? '🔥 RAMPAGE MODE' : '⚡ ACTIVATE RAMPAGE'}
-                  </motion.button>
                 </div>
 
                 <div className="relative">
@@ -407,7 +382,7 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                   <ResponsiveContainer width="100%" height={400}>
                     <PieChart>
                       <defs>
-                        {/* Enhanced Rampage Gradients */}
+                        {/* Chart gradients */}
                         <linearGradient id="keywordGradient" x1="0" y1="0" x2="1" y2="1">
                           <stop offset="0%" stopColor="#ef4444" stopOpacity={0.98}/>
                           <stop offset="20%" stopColor="#f87171" stopOpacity={0.98}/>
@@ -441,21 +416,16 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                           <stop offset="100%" stopColor="#fef2f2" stopOpacity={0.98}/>
                         </linearGradient>
 
-                        {/* Rampage Filters */}
-                        <filter id="rampageGlow">
+                        {/* Chart filters */}
+                        <filter id="chartGlow">
                           <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
                           <feMerge>
                             <feMergeNode in="coloredBlur"/>
                             <feMergeNode in="SourceGraphic"/>
                           </feMerge>
                         </filter>
-                        <filter id="rampageShadow">
-                          <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="rgba(239, 68, 68, 0.6)"/>
-                        </filter>
-                        <filter id="fireEffect">
-                          <feTurbulence baseFrequency="0.05" numOctaves="3" result="noise"/>
-                          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5"/>
-                          <feGaussianBlur stdDeviation="2"/>
+                        <filter id="chartShadow">
+                          <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="rgba(56, 189, 248, 0.25)"/>
                         </filter>
                       </defs>
 
@@ -463,14 +433,14 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                         data={pieData}
                         cx="50%"
                         cy="50%"
-                        outerRadius={isRampageMode ? 130 : 110}
-                        innerRadius={isRampageMode ? 60 : 50}
+                        outerRadius={110}
+                        innerRadius={50}
                         fill="#8884d8"
                         dataKey="value"
                         label={({ name, percent }) => activeSections.has(name) || activeSections.size === 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
                         labelLine={false}
                         animationBegin={0}
-                        animationDuration={isRampageMode ? 3000 : 2500}
+                        animationDuration={2500}
                         animationEasing="ease-out"
                         onClick={(data, index) => toggleSection(data.name)}
                       >
@@ -481,19 +451,13 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                               key={`cell-${index}`}
                               fill={isActive ? entry.gradient : 'url(#otherGradient)'}
                               stroke={entry.color}
-                              strokeWidth={isRampageMode ? 6 : 4}
-                              filter={isRampageMode ? "url(#rampageGlow) url(#fireEffect)" : "url(#rampageGlow)"}
-                              className={`transition-all duration-700 cursor-pointer ${
-                                isRampageMode
-                                  ? 'hover:scale-110 hover:rotate-12 animate-pulse'
-                                  : 'hover:scale-105 hover:opacity-90'
-                              }`}
+                              strokeWidth={4}
+                              filter="url(#chartGlow)"
+                              className="transition-all duration-700 cursor-pointer hover:scale-105 hover:opacity-90"
                               style={{
-                                filter: isRampageMode
-                                  ? 'drop-shadow(0 8px 16px rgba(239, 68, 68, 0.8)) brightness(1.2)'
-                                  : 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
                                 opacity: isActive ? 1 : 0.3,
-                                transform: isRampageMode ? 'scale(1.05)' : 'scale(1)',
+                                transform: 'scale(1)',
                               }}
                             />
                           );
@@ -546,81 +510,10 @@ const Dashboard = ({ token, user, onLogout, dark, setDark }) => {
                     </PieChart>
                   </ResponsiveContainer>
 
-                  {/* Rampage Mode Effects */}
-                  {isRampageMode && (
-                    <>
-                      <motion.div
-                        animate={{ rotate: [0, 360] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-0 rounded-full border-4 border-gradient-to-r from-red-500 via-orange-500 to-yellow-500 opacity-50"
-                      ></motion.div>
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.8, 0.3] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500/20 via-orange-500/20 to-yellow-500/20"
-                      ></motion.div>
-                    </>
-                  )}
+                  {/* Professional chart overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900/10 via-slate-800/10 to-slate-700/10 rounded-full"></div>
 
                   {/* Aggressive Floating Particles */}
-                  <motion.div
-                    animate={{
-                      y: [0, -15, 0],
-                      x: [0, 10, 0],
-                      rotate: [0, 180, 360],
-                      scale: [1, 1.3, 1]
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="absolute top-4 right-4 w-5 h-5 bg-gradient-to-br from-red-500 to-orange-500 rounded-full shadow-2xl animate-pulse"
-                  ></motion.div>
-
-                  <motion.div
-                    animate={{
-                      y: [0, 20, 0],
-                      x: [0, -15, 0],
-                      rotate: [360, 180, 0]
-                    }}
-                    transition={{
-                      duration: 3.5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: 0.5
-                    }}
-                    className="absolute bottom-6 left-6 w-4 h-4 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full shadow-2xl"
-                  ></motion.div>
-
-                  <motion.div
-                    animate={{
-                      scale: [0.8, 1.5, 0.8],
-                      opacity: [0.5, 1, 0.5],
-                      rotate: [0, 360]
-                    }}
-                    transition={{
-                      duration: 2.5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: 1
-                    }}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-4 border-red-500 rounded-full opacity-60"
-                  ></motion.div>
-
-                  <motion.div
-                    animate={{
-                      y: [0, -10, 0],
-                      opacity: [0.7, 1, 0.7]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: 1.5
-                    }}
-                    className="absolute bottom-4 right-4 w-3 h-3 bg-gradient-to-br from-yellow-500 to-red-500 rounded-full shadow-xl"
-                  ></motion.div>
                 </div>
               </motion.section>
             )}

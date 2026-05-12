@@ -1,5 +1,4 @@
 const axios = require("axios");
-
 const buildFallbackInsights = (scoreData) => ({
   explanation: `Your ATS score is ${scoreData.atsScore}/100. Improve keyword alignment and strengthen section depth to increase recruiter pass-through.`,
   bulletEnhancementTips: [
@@ -7,7 +6,6 @@ const buildFallbackInsights = (scoreData) => ({
     "Tailor bullets to match role requirements from the job description.",
   ],
 });
-
 const generateAIInsights = async (scoreData) => {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return buildFallbackInsights(scoreData);
@@ -34,5 +32,4 @@ const generateAIInsights = async (scoreData) => {
     return buildFallbackInsights(scoreData);
   }
 };
-
 module.exports = { generateAIInsights };
